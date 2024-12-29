@@ -14,4 +14,10 @@ public class MovieFactory {
 		MovieEntity movie = createMovieEntity();
 		return new MovieDTO(movie);
 	}
+
+	public static MovieEntity createMovieEntity(String title){
+		MovieEntity movie = createMovieEntity();
+		movie.setTitle(title);
+		return movie;
+	}
 }
