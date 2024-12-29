@@ -46,40 +46,37 @@ public class ScoreServiceTests {
 	private ScoreDTO scoreDTO;
 	private ScoreEntity score;
 	private UserEntity user;
-	private long nonExistingMovieId;
-
-	@BeforeEach
-	void setUp() {
-		movie = MovieFactory.createMovieEntity();
-		score = ScoreFactory.createScoreEntity();
-		user = UserFactory.createUserEntity();
-		nonExistingMovieId = 2L;
-		scoreDTO = new ScoreDTO(movie.getId(), ScoreFactory.scoreValue);
-		scoreDTO = new ScoreDTO(nonExistingMovieId, ScoreFactory.scoreValue);
-
-		Mockito.when(userService.authenticated()).thenReturn(user);
-		Mockito.when(movieRepository.findById(movie.getId())).thenReturn(Optional.of(movie));
-		Mockito.when(scoreRepository.saveAndFlush(any())).thenReturn(score);
-		Mockito.when(movieRepository.save(any())).thenReturn(movie);
-
-		Mockito.when(movieRepository.findById(nonExistingMovieId)).thenReturn(Optional.empty());
-	}
 
 	@Test
 	public void saveScoreShouldReturnMovieDTO() {
+		movie = MovieFactory.createMovieEntity();
+		score = ScoreFactory.createScoreEntity();
+		user = UserFactory.createUserEntity();
+		scoreDTO = new ScoreDTO(movie.getId(), ScoreFactory.scoreValue);
+
+		Mockito.when(movieRepository.findById(movie.getId())).thenReturn(Optional.of(movie));
+		Mockito.when(scoreRepository.saveAndFlush(any())).thenReturn(score);
+		Mockito.when(movieRepository.save(any())).thenReturn(movie);
+		Mockito.when(userService.authenticated()).thenReturn(user);
+
+
 		MovieDTO result = service.saveScore(scoreDTO);
 
-		Assertions.assertNotNull(result);
-		Assertions.assertEquals(result.getId(), movie.getId());
-		Assertions.assertEquals(result.getScore(), movie.getScore());
-		Assertions.assertEquals(result.getCount(), movie.getCount());
-
+		assertNotNull(result);
+		assertEquals(movie.getId(), result.getId());
+		assertEquals(movie.getScore(), result.getScore());
+		assertEquals(movie.getCount(), result.getCount());
 	}
-	
+
 	@Test
 	public void saveScoreShouldThrowResourceNotFoundExceptionWhenNonExistingMovieId() {
+		Long nonExistingMovieId = 9L;
+		scoreDTO = new ScoreDTO(nonExistingMovieId, ScoreFactory.scoreValue);
+		Mockito.when(movieRepository.findById(nonExistingMovieId)).thenReturn(Optional.empty());
+
 		Assertions.assertThrows(ResourceNotFoundException.class, () -> {
 			service.saveScore(scoreDTO);
 		});
 	}
+
 }
